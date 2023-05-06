@@ -1,6 +1,8 @@
 #include <iostream>
-#include<vector>
+#include <vector>
 #include <cstdlib>
+#include <cmath>
+#include <algorithm>
 #include "Node.hpp"
 #include "NodeOperator.hpp"
 #include "NodeTerminal.hpp"
@@ -13,14 +15,15 @@ const vector<char> terminal = {'x','1','2','3','4','5'};
 
 using namespace std;
 //vector<Tree*> selection(int type,&vector<Tree*> population);
-//Tree* selectionRoullete(&vector<Tree*> population);
-//Tree* selectionTournament(&vector<Tree*> population, int k);
+Tree* selectionRoulette(vector<Tree*> population,vector<float>& input,vector<float>&realValues);
+Tree* selectionTournament(vector<Tree*> population,vector<float>& input,vector<float>&realValues,int k);
 //Tree* selectionLexicase(&vector<Tree> population);
 
 vector<Tree*> operatorSelector(vector<Tree*>selected,float probMutation,float probCrossover);
 vector<Tree*> initialPopulation(int size);
 Node* generateFullRandomTree(int size,int depthmax = DEPTHMAX);
 Node* generateGrowRandomTree(int size,int depthmax = DEPTHMAX);
+float eval(Tree* subject,float input);
 
 
 int main(int argc, char const *argv[]) {
@@ -102,4 +105,59 @@ vector<Tree*> operatorSelector(vector<Tree*>selected,float probMutation,float pr
 
     }
     return selected;
+}
+
+float fitness(Tree* subject,vector<float>& input,vector<float>&realValues){
+    int N = input.size();
+    float sumEval =0;
+   for(int i=0;i<N;i++){
+        sumEval += pow(eval(subject,input[i])-realValues[i],2);
+   }
+   float RSME = (1/N)*sumEval;
+    return pow(RSME,1/2);
+}
+
+float eval(Tree* subject,float input){
+    return subject->f(input);
+}
+
+
+Tree* selectionRoulette(vector<Tree*> population,vector<float>& input,vector<float>&realValues){
+    vector<pair<float,Tree*>> roulette;
+    float fitnessTotal =0;
+    float fitnessInd;
+    for(int i=0;i<population.size();i++){
+        fitnessInd = fitness(population[i],input,realValues);
+        roulette.push_back(make_pair(fitnessInd,population[i]));
+        fitnessTotal += fitnessInd;
+    }
+    for(int i = 0;i<roulette.size();i++){
+        roulette[i].first = roulette[i].first/fitnessTotal;
+        if(i!=0){
+            roulette[i].first += roulette[i-1].first;
+        }
+        std::sort(roulette.begin(),roulette.end());
+    }
+    float random= (rand()%(int)fitnessTotal)/fitnessTotal;
+    int j =0;
+    while(random>roulette[j].first){
+        j++;
+    }
+    return roulette[j].second;
+
+}
+
+Tree* selectionTournament(vector<Tree*> population,vector<float>& input,vector<float>&realValues,int k){
+    Tree* bestTree = nullptr;
+    int random=0;
+    for(int i=0;i<k;i++){
+        random = rand()%population.size();
+        if (bestTree == nullptr){
+            bestTree = population[random];
+        }
+        if(fitness(bestTree,input,realValues)<fitness(population[random],input,realValues)){
+            bestTree = population[random];
+        }
+    }
+    return bestTree;
 }

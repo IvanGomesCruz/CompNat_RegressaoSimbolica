@@ -21,7 +21,7 @@ public:
     Tree(Node* root,int maxDepht);
     int dephtTree();
     void mutation();
-    float fitness(float input);
+    float f(float input);
     static void updateDepth(Node* node,int depth);
     void crossover(Tree* partiner);
     void print();

@@ -7,8 +7,8 @@ Tree::Tree(Node* root,int maxDepht){
     this->root->depth = 0;
     
 }
-float Tree::fitness(float input){
-    return this->root->fitness(input);
+float Tree::f(float input){
+    return this->root->f(input);
 }
 void Tree::updateDepth(Node* node,int depth =0){
     if(node==nullptr) return;

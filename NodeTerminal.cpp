@@ -12,7 +12,7 @@ NodeTerminal::NodeTerminal(char value,vector<char> options){
     this->type = 1;
     this->options = options;
 }
-float NodeTerminal::fitness(float input){
+float NodeTerminal::f(float input){
     if(this->representation = 'x'){
         return input;
     }

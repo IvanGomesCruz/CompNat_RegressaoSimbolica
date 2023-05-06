@@ -6,26 +6,26 @@ NodeOperator::NodeOperator(char operatorType,vector<char> options){
     this->options = options;
 }
 
-float NodeOperator::fitness(float input){
-    float fitness;
+float NodeOperator::f(float input){
+    float f;
     switch(this->representation){
-        case '+': fitness = (*this->children[0]).fitness(input)+(*this->children[1]).fitness(input); break;
-        case '-': fitness = (*this->children[0]).fitness(input)-(*this->children[1]).fitness(input); break;
-        case '*': fitness = (*this->children[0]).fitness(input)*(*this->children[1]).fitness(input); break;
+        case '+': f = (*this->children[0]).f(input)+(*this->children[1]).f(input); break;
+        case '-': f = (*this->children[0]).f(input)-(*this->children[1]).f(input); break;
+        case '*': f = (*this->children[0]).f(input)*(*this->children[1]).f(input); break;
         case '/': 
             float aux1,aux2;
-            aux1= (*this->children[0]).fitness(input);
-            aux2= (*this->children[1]).fitness(input);
+            aux1= (*this->children[0]).f(input);
+            aux2= (*this->children[1]).f(input);
             if(aux2 ==0){
-                fitness = 1;
+                f = 1;
             }
             else{
-                fitness = aux1/aux2;
+                f = aux1/aux2;
             }
             break;
         default: cout<<"undefined operator"<<endl;
     }
-    return fitness;
+    return f;
 }
 
 void NodeOperator::addChild(Node* child){

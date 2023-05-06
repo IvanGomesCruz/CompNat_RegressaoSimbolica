@@ -20,7 +20,7 @@ class Node
     int type;
     char representation;
     Node* parent;
-    virtual float fitness(float input) = 0;
+    virtual float f(float input) = 0;
     vector<Node*> children;
     virtual string print() =0;
     virtual void addChild(Node* child) =0;
