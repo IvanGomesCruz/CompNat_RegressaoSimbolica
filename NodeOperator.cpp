@@ -36,6 +36,7 @@ void NodeOperator::addChild(Node* child){
         this->children[1] = child;
     }
     child->depth = this->depth+1;
+    child->parent = this;
 }
 
 

@@ -19,6 +19,7 @@ class Node
     int depth;
     int type;
     char representation;
+    Node* parent;
     virtual float fitness(float input) = 0;
     vector<Node*> children;
     virtual string print() =0;

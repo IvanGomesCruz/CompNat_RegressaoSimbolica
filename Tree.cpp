@@ -1,6 +1,8 @@
 #include "Tree.hpp"
 
-Tree::Tree(Node* root){
+Tree::Tree(Node* root,int maxDepht){
+    this->MaxDepth = maxDepht;
+
     this->root = root;
     this->root->depth = 0;
     
@@ -68,4 +70,62 @@ bool Tree::mutation(Node* node){
 }
 void Tree::mutation(){
     mutation(this->root);
+}
+
+void Tree::crossover(Tree* partiner){
+    int partnerDepht = partiner->dephtTree();
+    int thisDepht = this->dephtTree();
+    ///determina uma altura para o crossover;
+    int height;
+    height = rand()%thisDepht; 
+
+
+    vector<Node*> thisOptions = this->BFS(height);
+    vector<Node*> partnerOptions = partiner->BFS(height);
+
+    //gerar o indice dos Nodes a serem trocados
+    int i = rand()%thisOptions.size();
+    int j = rand()%partnerOptions.size();
+
+    //Troca os pontos
+    Node* aux = thisOptions[i]->parent;
+
+    cout<<thisOptions[i]->representation<<"------"<<partnerOptions[j]->representation<<endl;
+    thisOptions[i]->parent = partnerOptions[j]->parent;
+    if(partnerOptions[j]->parent->children[0]==partnerOptions[j]){
+        partnerOptions[j]->parent->children[0] = thisOptions[i];
+    }
+    else{
+         partnerOptions[j]->parent->children[1] = thisOptions[i];
+    }
+
+    partnerOptions[j]->parent = aux->parent;
+     if(aux->children[0]==thisOptions[i]){
+        aux->children[0] = partnerOptions[j];
+    }
+    else{
+         aux->children[1] = partnerOptions[j];
+    } 
+   
+
+}
+
+vector<Node*> Tree::BFS(int depth){ // retorna os nós que estão na altura estabelecida
+    vector<Node*>vector;
+    queue<Node *> q;
+    q.push(this->root);
+    while (q.empty() == false) {
+      Node* node = q.front();
+      if(node->depth==depth) {
+        vector.push_back(node);
+      }
+      q.pop();
+      if(node->depth<=depth){
+        if (node->children[0] != NULL)
+            q.push(node->children[0]);
+        if (node->children[1] != NULL)
+            q.push(node->children[1]);
+      }
+   }
+   return vector;
 }
