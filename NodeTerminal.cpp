@@ -3,17 +3,17 @@ NodeTerminal::NodeTerminal(){
     this->type = 1; 
     this->children = {nullptr,nullptr};
 }
-NodeTerminal::NodeTerminal(char value,vector<char> options){
+NodeTerminal::NodeTerminal(string value,vector<string> options){
     this->children = {nullptr,nullptr};
     this->representation = value;
-    if(value != 'x'){
-        this->terminalValue = value - '0';
+    if(value[0] != 'x'){
+        this->terminalValue = stoi(value);
     }
     this->type = 1;
     this->options = options;
 }
 float NodeTerminal::f(float input){
-    if(this->representation = 'x'){
+    if(this->representation[0] = 'x'){
         return input;
     }
     return this->terminalValue;
@@ -25,6 +25,5 @@ void NodeTerminal::addChild(Node* child){
 }
 
 string NodeTerminal::print(){
-    string aux (1,representation);
-    return aux;
+    return this->representation;
 }

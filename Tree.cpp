@@ -89,8 +89,6 @@ void Tree::crossover(Tree* partiner){
 
     //Troca os pontos
     Node* aux = thisOptions[i]->parent;
-
-    cout<<thisOptions[i]->representation<<"------"<<partnerOptions[j]->representation<<endl;
     thisOptions[i]->parent = partnerOptions[j]->parent;
     if(partnerOptions[j]->parent->children[0]==partnerOptions[j]){
         partnerOptions[j]->parent->children[0] = thisOptions[i];

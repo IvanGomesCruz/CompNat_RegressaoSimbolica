@@ -7,14 +7,15 @@
 #include "NodeOperator.hpp"
 #include "NodeTerminal.hpp"
 #include "Tree.hpp"
+#include "ConfigEntrada.hpp"
 
 #define DEPTHMAX 4
 #define POPULATIONSIZE 10
-const vector<char> operators = {'+', '-', '*','/'};
-const vector<char> terminal = {'x','1','2','3','4','5'};
+const vector<string> operators = {"+","-","*","/"};
+const vector<string> terminal = {"x","1","2","3"};
 
 using namespace std;
-//vector<Tree*> selection(int type,&vector<Tree*> population);
+vector<Tree*> selection(int type,vector<Tree*> population,vector<float>& input,vector<float>&realValues,int k);
 Tree* selectionRoulette(vector<Tree*> population,vector<float>& input,vector<float>&realValues);
 Tree* selectionTournament(vector<Tree*> population,vector<float>& input,vector<float>&realValues,int k);
 //Tree* selectionLexicase(&vector<Tree> population);
@@ -27,13 +28,25 @@ float eval(Tree* subject,float input);
 
 
 int main(int argc, char const *argv[]) {
-    srand(1);
-    vector<Tree*> population = initialPopulation(POPULATIONSIZE);
-        population[1]->print();
-        population[2]->print();
-        population[1]->crossover(population[2]);
-         population[1]->print();
-        population[2]->print();
+    string str;
+    int i =1;
+    while(i<argc){
+    str.append(argv[i]);
+    str.append(" ");
+    i++;
+  }
+    ConfigEntrada* inputConfig = ConfigEntrada::getInstancia(str);
+    srand(inputConfig->seed);
+    for(int i=0; i<inputConfig->terminals.size(); i++){
+        cout<<inputConfig->terminals[i]<<endl;
+    }
+
+    //vector<Tree*> population = initialPopulation(inputConfig->populationSize);
+      //  population[1]->print();
+       // population[2]->print();
+       // population[1]->crossover(population[2]);
+        // population[1]->print();
+        //population[2]->print();
     
     return 0;
 }
@@ -61,7 +74,6 @@ Node* generateFullRandomTree(int depth,int depthmax) {
     int random;
     if(depth == depthmax){
         random = rand()%terminal.size();
-       
         return new NodeTerminal(terminal[random],terminal);
         
     }
@@ -77,7 +89,7 @@ Node* generateGrowRandomTree(int depth,int depthmax) {
     random = rand()%2; //Determina se será Operador ou Terminal
     if(random ==1 || depth == DEPTHMAX){
         random = rand()%terminal.size();
-      
+
         return new NodeTerminal(terminal[random],terminal);
         
     }
@@ -160,4 +172,23 @@ Tree* selectionTournament(vector<Tree*> population,vector<float>& input,vector<f
         }
     }
     return bestTree;
+}
+
+
+vector<Tree*> selection(int type,vector<Tree*> population,vector<float>& input,vector<float>&realValues,int k){
+    vector<Tree*> selected;
+    for(int i=0;i<POPULATIONSIZE;i++){
+
+        switch(type){
+            case 0 : 
+                selected.push_back(selectionRoulette(population,input,realValues));
+                break;
+            case 1 : 
+                selected.push_back(selectionTournament(population,input,realValues,k));
+                break;
+            case 2 : 
+                break;
+        }
+    }
+    return selected;
 }

@@ -6,7 +6,7 @@
 class NodeOperator: public Node
 {
     public:
-    NodeOperator(char operatorType,vector<char> options);
+    NodeOperator(string operatorType,vector<string> options);
     float f(float input) override;
     void addChild(Node* child);
     string print() override;

@@ -1,6 +1,6 @@
 #include "NodeOperator.hpp"
 
-NodeOperator::NodeOperator(char operatorType,vector<char> options){
+NodeOperator::NodeOperator(string operatorType,vector<string> options){
     this->representation = operatorType;
     this->children = {nullptr,nullptr};
     this->options = options;
@@ -8,7 +8,7 @@ NodeOperator::NodeOperator(char operatorType,vector<char> options){
 
 float NodeOperator::f(float input){
     float f;
-    switch(this->representation){
+    switch(this->representation[0]){
         case '+': f = (*this->children[0]).f(input)+(*this->children[1]).f(input); break;
         case '-': f = (*this->children[0]).f(input)-(*this->children[1]).f(input); break;
         case '*': f = (*this->children[0]).f(input)*(*this->children[1]).f(input); break;
@@ -42,7 +42,7 @@ void NodeOperator::addChild(Node* child){
 
 string NodeOperator::print(){
     string aux = "("+this->children[0]->print();
-    string aux2(1,this->representation);
+    string aux2 = this->representation;
     string aux3 = this->children[1]->print();
     aux.append(aux2);
     aux.append(aux3);

@@ -4,6 +4,7 @@
 #include <iostream>
 #include <vector>
 #include <string>
+#include "ConfigEntrada.hpp"
 
 using namespace std;
 
@@ -18,13 +19,13 @@ class Node
     public:
     int depth;
     int type;
-    char representation;
+    string representation;
     Node* parent;
     virtual float f(float input) = 0;
     vector<Node*> children;
     virtual string print() =0;
     virtual void addChild(Node* child) =0;
-    vector<char> options;
+    vector<string> options;
     void mutation();
 };
 
