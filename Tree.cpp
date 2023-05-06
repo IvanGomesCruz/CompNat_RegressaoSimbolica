@@ -38,12 +38,11 @@ int Tree::dephtTree(Node* node){
 }
 
 bool Tree::mutation(Node* node){
-    if(node = nullptr){
+    if(node == nullptr){
         return false;
     }
     int maxdepth = this->dephtTree();
     int random = rand()%maxdepth;
-        cout<<node->depth<<endl;
     if(random<= node->depth){ // Probabilidade de mutação cresce conforme a profundidade
         node->mutation();
 
@@ -68,5 +67,5 @@ bool Tree::mutation(Node* node){
 
 }
 void Tree::mutation(){
-    bool garbage = mutation(this->root);
+    mutation(this->root);
 }

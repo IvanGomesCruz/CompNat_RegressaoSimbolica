@@ -3,14 +3,20 @@ NodeTerminal::NodeTerminal(){
     this->type = 1; 
     this->children = {nullptr,nullptr};
 }
-NodeTerminal::NodeTerminal(vector<char> options){
+NodeTerminal::NodeTerminal(char value,vector<char> options){
     this->children = {nullptr,nullptr};
-    this->representation = 'x';
+    this->representation = value;
+    if(value != 'x'){
+        this->terminalValue = value - '0';
+    }
     this->type = 1;
     this->options = options;
 }
 float NodeTerminal::fitness(float input){
-    return input;
+    if(this->representation = 'x'){
+        return input;
+    }
+    return this->terminalValue;
 }
 
 

@@ -4,7 +4,6 @@
 #include "Node.hpp"
 #include "NodeOperator.hpp"
 #include "NodeTerminal.hpp"
-#include "NodeTerminalConst.hpp"
 #include "Tree.hpp"
 
 #define DEPTHMAX 4
@@ -28,9 +27,9 @@ int main(int argc, char const *argv[]) {
     srand(1);
     vector<Tree*> population = initialPopulation(POPULATIONSIZE);
     population[3]->print();
-    cout<<"entra"<<endl;
+
     population[3]->mutation();
-    cout<<"sai"<<endl;
+
     population[3]->print();
     return 0;
 }
@@ -58,12 +57,9 @@ Node* generateFullRandomTree(int depth,int depthmax) {
     int random;
     if(depth == depthmax){
         random = rand()%terminal.size();
-        if(terminal[random]=='x'){
-            return new NodeTerminal();
-        }
-        else{
-            return new NodeTerminalConst(terminal[random],terminal);
-        }
+       
+        return new NodeTerminal(terminal[random],terminal);
+        
     }
     random = rand() %operators.size();
     Node* node = new NodeOperator(operators[random],operators);
@@ -77,12 +73,9 @@ Node* generateGrowRandomTree(int depth,int depthmax) {
     random = rand()%2; //Determina se será Operador ou Terminal
     if(random ==1 || depth == DEPTHMAX){
         random = rand()%terminal.size();
-        if(terminal[random]=='x'){
-            return new NodeTerminal();
-        }
-        else{
-            return new NodeTerminalConst(terminal[random],terminal);
-        }
+      
+        return new NodeTerminal(terminal[random],terminal);
+        
     }
     random = rand() %operators.size();
     Node* node = new NodeOperator(operators[random],operators);
