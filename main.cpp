@@ -28,6 +28,7 @@ Node* generateGrowRandomTree(int size,int depthmax = DEPTHMAX);
 float eval(Tree* subject,vector<float> input);
 Tree* evoluition(int generation,vector<Tree*>population,vector<vector<float>> data);
 Tree* BestGen(vector<Tree*> population,vector<vector<float>> data);
+Tree* GP(int seed);
 
 
 int main(int argc, char const *argv[]) {
@@ -40,18 +41,31 @@ int main(int argc, char const *argv[]) {
     }
     ConfigEntrada* inputConfig = ConfigEntrada::getInstancia(str);
     
+    Tree* solution =  GP(inputConfig->seed);
+    vector<Tree*> random = initialPopulation(inputConfig->numGeneration*inputConfig->populationSize);
+    Tree* bestRandom = BestGen(random,inputConfig->datasetTrain);
+
+    std::cout<<"----------------------------"<<endl;
+    std::cout<<"GP:"<<endl;
+    solution->print();
+    std::cout<<"Fitness Treino: "<<fitness(solution,inputConfig->datasetTrain)<<endl;
+    std::cout<<"Fitness Teste: "<<fitness(solution,inputConfig->datasetTest)<<endl;
+    std::cout<<"Random:"<<endl;
+    bestRandom->print();
+    std::cout<<"Fitness Treino: "<<fitness(bestRandom,inputConfig->datasetTrain)<<endl;
+    std::cout<<"Fitness Teste: "<<fitness(bestRandom,inputConfig->datasetTest)<<endl;
+    std::cout<<"----------------------------"<<endl;
+    return 0;
+}
+Tree* GP(int seed){
+    ConfigEntrada* inputConfig = ConfigEntrada::getInstancia();
+    
     srand(inputConfig->seed);
     
     vector<Tree*> population = initialPopulation(inputConfig->populationSize);
  
     Tree* solution = evoluition(inputConfig->numGeneration,population,inputConfig->datasetTrain);
-
-    std::cout<<"----------------------------"<<endl;
-    solution->print();
-    std::cout<<"Fitness Treino: "<<fitness(solution,inputConfig->datasetTrain)<<endl;
-    std::cout<<"Fitness Teste: "<<fitness(solution,inputConfig->datasetTest)<<endl;
-    std::cout<<"----------------------------"<<endl;
-    return 0;
+    return solution;
 }
 Tree* evoluition(int generation,vector<Tree*>population,vector<vector<float>> data){
     ConfigEntrada* inputConfig = ConfigEntrada::getInstancia();
