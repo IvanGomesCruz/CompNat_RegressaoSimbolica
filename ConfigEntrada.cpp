@@ -24,12 +24,13 @@ ConfigEntrada::ConfigEntrada(string entrada)
     this->crossoverProb = stof(identificaFlag(entrada,"-c "))/100;
     this->trainData = identificaFlag(entrada,"-tr ");
     this->testData = identificaFlag(entrada,"-ts ");
+    this->elitism = stoi(identificaFlag(entrada,"-e "));
     this->instancia = this;
     this->datasetTest = createVectors(this->testData);
     this->datasetTrain = createVectors(this->trainData);
     this->numVariables = this->datasetTrain[0].size()-1;
     this->dephtMax = 7;
-    this->terminals = {"1","2"};
+    this->terminals = {"2","3","5"};
     generateVariables();
 
 }

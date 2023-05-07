@@ -26,6 +26,7 @@ public:
     int selectionType;
     int populationSize;
     int dephtMax;
+    int elitism;
     float crossoverProb;
     float mutationProb;
     vector<vector<float>> datasetTrain;

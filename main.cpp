@@ -3,13 +3,14 @@
 #include <cstdlib>
 #include <cmath>
 #include <algorithm>
+#include <set>
 #include "Node.hpp"
 #include "NodeOperator.hpp"
 #include "NodeTerminal.hpp"
 #include "Tree.hpp"
 #include "ConfigEntrada.hpp"
 
-#define DEPTHMAX 4
+#define DEPTHMAX 7
 #define POPULATIONSIZE 10
 const vector<string> operators = {"+","-","*","/"};
 //const vector<string> terminal = {"x","1","2","3"};
@@ -38,45 +39,59 @@ int main(int argc, char const *argv[]) {
         i++;
     }
     ConfigEntrada* inputConfig = ConfigEntrada::getInstancia(str);
+    
     srand(inputConfig->seed);
+    
     vector<Tree*> population = initialPopulation(inputConfig->populationSize);
  
     Tree* solution = evoluition(inputConfig->numGeneration,population,inputConfig->datasetTrain);
-    cout<<"----------------------------"<<endl;
+
+    std::cout<<"----------------------------"<<endl;
     solution->print();
-    cout<<"Fitness Treino: "<<fitness(solution,inputConfig->datasetTrain)<<endl;
-    cout<<"Fitness Teste: "<<fitness(solution,inputConfig->datasetTest)<<endl;
-    cout<<"----------------------------"<<endl;
+    std::cout<<"Fitness Treino: "<<fitness(solution,inputConfig->datasetTrain)<<endl;
+    std::cout<<"Fitness Teste: "<<fitness(solution,inputConfig->datasetTest)<<endl;
+    std::cout<<"----------------------------"<<endl;
     return 0;
 }
 Tree* evoluition(int generation,vector<Tree*>population,vector<vector<float>> data){
     ConfigEntrada* inputConfig = ConfigEntrada::getInstancia();
     int it =0;
+    vector<Tree*>newPopulation = population;
+    vector<Tree*>selected;
     Tree* best = nullptr;
     while(it<generation){
-        best = BestGen(population,data);
-        cout<<"Gen "<<it<<":"<<fitness(best,data)<<endl;
+        best = BestGen(newPopulation,data);
+        std::cout<<"Gen "<<it<<":"<<fitness(best,data)<<endl;
         best->print();
-        population = selection(inputConfig->selectionType,population,data);
-        population = operatorSelector(population,inputConfig->mutationProb,inputConfig->crossoverProb);
+        selected = selection(inputConfig->selectionType,newPopulation,data);
+        newPopulation = operatorSelector(selected,inputConfig->mutationProb,inputConfig->crossoverProb);
+        for(int i = 0; i <inputConfig->elitism;i++){
+            newPopulation.push_back(best->copy());
+        }
         it++;
     }
-    best = BestGen(population,data);
+    best = BestGen(newPopulation,data);
     return best;
 }
 Tree* BestGen(vector<Tree*> population,vector<vector<float>> data){
     Tree* best = nullptr;
+    set<float> diversity;
+    float aux;
     for(int i =0; i<population.size();i++){
         if(best == nullptr){
-            best= population[i];
+            best= population[i]->copy();
         }
-        if(fitness(population[i],data)<fitness(best,data)){
-            best = population[i];
+        aux = fitness(population[i],data);
+        diversity.insert(aux);
+        if(aux<fitness(best,data)){
+            best = population[i]->copy();
         }
     }
+    std::cout<<"Diversidade: "<<diversity.size()<<endl; 
     return best;
-
 }
+
+
 
 vector<Tree*> initialPopulation(int size){
     vector<Tree*> population;
@@ -166,6 +181,7 @@ float eval(Tree* subject,vector<float> input){
 }
 
 vector<Tree*> selectionRoulette(vector<Tree*> population,vector<vector<float>>& input){
+    ConfigEntrada* inputConfig = ConfigEntrada::getInstancia();
     vector<Tree*> selected;
      vector<pair<float,Tree*>> roulette;
     float fitnessTotal =0;
@@ -184,7 +200,7 @@ vector<Tree*> selectionRoulette(vector<Tree*> population,vector<vector<float>>& 
     }
     float random;
     int it=0;
-    while(it<population.size()){
+    while(it<population.size()-inputConfig->elitism){
         random = (rand()%10000000)/10000000;
         int j =0;
         while(random>roulette[j].first){
@@ -220,7 +236,7 @@ vector<Tree*> selection(int type,vector<Tree*> population,vector<vector<float>>&
                 selected = selectionRoulette(population,input);
                 break;
             case 1 : 
-                while(selected.size()<population.size()){
+                while(selected.size()<population.size()-inputConfig->elitism){
                     selected.push_back(selectionTournament(population,input,inputConfig->k));
                 }
                 break;
