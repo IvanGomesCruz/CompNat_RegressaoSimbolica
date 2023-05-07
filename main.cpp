@@ -4,6 +4,7 @@
 #include <cmath>
 #include <algorithm>
 #include <set>
+#include <random>
 #include "Node.hpp"
 #include "NodeOperator.hpp"
 #include "NodeTerminal.hpp"
@@ -19,7 +20,9 @@ using namespace std;
 vector<Tree*> selection(int type,vector<Tree*> population,vector<vector<float>>& input);
 vector<Tree*> selectionRoulette(vector<Tree*> population,vector<vector<float>>& input);
 Tree* selectionTournament(vector<Tree*> population,vector<vector<float>>& input,int k);
-//Tree* selectionLexicase(&vector<Tree> population);
+Tree* selectionLexicase(vector<Tree*> population,vector<vector<float>> input);
+float calcMedian(std::vector<float>& vector);
+float threshold(vector<Tree*> selected,vector<float> input);
 float fitness(Tree* subject,vector<vector<float>>& dataset);
 vector<Tree*> operatorSelector(vector<Tree*>selected,float probMutation,float probCrossover);
 vector<Tree*> initialPopulation(int size);
@@ -63,7 +66,6 @@ Tree* GP(int seed){
     srand(inputConfig->seed);
     
     vector<Tree*> population = initialPopulation(inputConfig->populationSize);
- 
     Tree* solution = evoluition(inputConfig->numGeneration,population,inputConfig->datasetTrain);
     return solution;
 }
@@ -198,6 +200,7 @@ vector<Tree*> selectionRoulette(vector<Tree*> population,vector<vector<float>>& 
     ConfigEntrada* inputConfig = ConfigEntrada::getInstancia();
     vector<Tree*> selected;
      vector<pair<float,Tree*>> roulette;
+     
     float fitnessTotal =0;
     float fitnessInd=0;
     for(int i=0;i<population.size();i++){
@@ -255,8 +258,83 @@ vector<Tree*> selection(int type,vector<Tree*> population,vector<vector<float>>&
                 }
                 break;
             case 2 : 
+                while(selected.size()<population.size()-inputConfig->elitism){
+                    selected.push_back(selectionLexicase(population,input));
+                }
+
                 break;
         }
     
     return selected;
+}
+
+float threshold(vector<Tree*> selected,vector<float> input){
+    
+    float median;
+    vector<float> fitnessExemples;
+    float e_min; 
+    float MAD;
+    float epsilon;
+    vector<vector<float>> aux;
+    aux.push_back(input);
+     for(int i = 0; i <selected.size(); i++){
+            fitnessExemples.push_back(fitness(selected[i],aux));
+        }
+        std::sort(fitnessExemples.begin(), fitnessExemples.end());
+        e_min = fitnessExemples[0];
+        median = calcMedian(fitnessExemples);
+        for(int i = 0; i <fitnessExemples.size(); i++){
+            fitnessExemples[i]= abs(fitnessExemples[i] - median);
+        }
+        MAD = calcMedian(fitnessExemples);
+        return e_min + MAD;
+}
+
+Tree* selectionLexicase(vector<Tree*> population,vector<vector<float>> input){
+    ConfigEntrada* inputConfig = ConfigEntrada::getInstancia();
+    vector<float> inputExemple;
+    vector<Tree*> selected = population;
+    vector<Tree*> next;
+    vector<vector<float>> aux;
+    std::mt19937 generator(rand());
+    float valueThreshold;
+    std::shuffle(input.begin(), input.end(), generator);
+    for(int it =0; it < input.size(); it++){
+        if(selected.size() == 1){
+            break;
+        }
+        aux.clear();
+        inputExemple = input.back();
+        aux.push_back(inputExemple);
+        input.pop_back();
+        valueThreshold =threshold(selected,inputExemple);
+        for(int i = 0; i<selected.size(); i++){
+            if(fitness(selected[i],aux)<valueThreshold){
+                next.push_back(selected[i]);
+            }
+        }
+        if(next.size()==0){
+            next.push_back(selected[rand()%selected.size()]);
+        }
+        selected.clear();
+        selected = next;
+        next.clear();
+
+    }
+    return selected[0];
+}
+
+float calcMedian(std::vector<float>& vector) {
+    std::sort(vector.begin(), vector.end());
+
+    if (vector.size() % 2 == 0) {
+        // Tamanho par
+        int ind1 = vector.size() / 2 - 1;
+        int ind2 = vector.size() / 2;
+        return (vector[ind1] + vector[ind2]) / 2.0f;
+    } else {
+        // Tamanho ímpar
+        int ind = vector.size() / 2;
+        return vector[ind];
+    }
 }
