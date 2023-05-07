@@ -6,7 +6,7 @@ NodeOperator::NodeOperator(string operatorType,vector<string> options){
     this->options = options;
 }
 
-float NodeOperator::f(float input){
+float NodeOperator::f(vector<float> input){
     float f;
     switch(this->representation[0]){
         case '+': f = (*this->children[0]).f(input)+(*this->children[1]).f(input); break;
@@ -47,5 +47,12 @@ string NodeOperator::print(){
     aux.append(aux2);
     aux.append(aux3);
     return aux + ")";
+}
+
+Node* NodeOperator::copy(){
+    Node* copy = new NodeOperator(this->representation,this->options);
+    copy->children[0] = this->children[0]->copy();
+    copy->children[1] = this->children[1]->copy();
+    return copy;
 }
 

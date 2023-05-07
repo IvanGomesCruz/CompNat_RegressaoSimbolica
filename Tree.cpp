@@ -7,7 +7,7 @@ Tree::Tree(Node* root,int maxDepht){
     this->root->depth = 0;
     
 }
-float Tree::f(float input){
+float Tree::f(vector<float> input){
     return this->root->f(input);
 }
 void Tree::updateDepth(Node* node,int depth =0){
@@ -43,8 +43,7 @@ bool Tree::mutation(Node* node){
     if(node == nullptr){
         return false;
     }
-    int maxdepth = this->dephtTree();
-    int random = rand()%maxdepth;
+    int random = rand()%7;
     if(random<= node->depth){ // Probabilidade de mutação cresce conforme a profundidade
         node->mutation();
 
@@ -74,10 +73,9 @@ void Tree::mutation(){
 
 void Tree::crossover(Tree* partiner){
     int partnerDepht = partiner->dephtTree();
-    int thisDepht = this->dephtTree();
     ///determina uma altura para o crossover;
     int height;
-    height = rand()%thisDepht; 
+    height = rand()%7; 
 
 
     vector<Node*> thisOptions = this->BFS(height);
@@ -126,4 +124,9 @@ vector<Node*> Tree::BFS(int depth){ // retorna os nós que estão na altura esta
       }
    }
    return vector;
+}
+
+Tree* Tree::copy(){
+    Tree* copy = new Tree(this->root->copy(),this->MaxDepth);
+    return copy;
 }

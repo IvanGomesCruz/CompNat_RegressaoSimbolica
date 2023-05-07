@@ -21,10 +21,11 @@ public:
     Tree(Node* root,int maxDepht);
     int dephtTree();
     void mutation();
-    float f(float input);
+    float f(vector<float> input);
     static void updateDepth(Node* node,int depth);
     void crossover(Tree* partiner);
     void print();
+    Tree* copy();
 };
 
 #endif

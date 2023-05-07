@@ -8,9 +8,10 @@ class NodeTerminal: public Node
     NodeTerminal();
     float terminalValue;
     NodeTerminal(string value,vector<string> options);
-    float f(float input) override;
+    float f(vector<float> input) override;
     string print() override;
     void addChild(Node* child) override;
+    Node* copy() override;
 
 };
 

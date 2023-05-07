@@ -12,43 +12,70 @@
 #define DEPTHMAX 4
 #define POPULATIONSIZE 10
 const vector<string> operators = {"+","-","*","/"};
-const vector<string> terminal = {"x","1","2","3"};
+//const vector<string> terminal = {"x","1","2","3"};
 
 using namespace std;
-vector<Tree*> selection(int type,vector<Tree*> population,vector<float>& input,vector<float>&realValues,int k);
-Tree* selectionRoulette(vector<Tree*> population,vector<float>& input,vector<float>&realValues);
-Tree* selectionTournament(vector<Tree*> population,vector<float>& input,vector<float>&realValues,int k);
+vector<Tree*> selection(int type,vector<Tree*> population,vector<vector<float>>& input);
+vector<Tree*> selectionRoulette(vector<Tree*> population,vector<vector<float>>& input);
+Tree* selectionTournament(vector<Tree*> population,vector<vector<float>>& input,int k);
 //Tree* selectionLexicase(&vector<Tree> population);
-
+float fitness(Tree* subject,vector<vector<float>>& dataset);
 vector<Tree*> operatorSelector(vector<Tree*>selected,float probMutation,float probCrossover);
 vector<Tree*> initialPopulation(int size);
 Node* generateFullRandomTree(int size,int depthmax = DEPTHMAX);
 Node* generateGrowRandomTree(int size,int depthmax = DEPTHMAX);
-float eval(Tree* subject,float input);
+float eval(Tree* subject,vector<float> input);
+Tree* evoluition(int generation,vector<Tree*>population,vector<vector<float>> data);
+Tree* BestGen(vector<Tree*> population,vector<vector<float>> data);
 
 
 int main(int argc, char const *argv[]) {
     string str;
     int i =1;
     while(i<argc){
-    str.append(argv[i]);
-    str.append(" ");
-    i++;
-  }
+        str.append(argv[i]);
+        str.append(" ");
+        i++;
+    }
     ConfigEntrada* inputConfig = ConfigEntrada::getInstancia(str);
     srand(inputConfig->seed);
-    for(int i=0; i<inputConfig->terminals.size(); i++){
-        cout<<inputConfig->terminals[i]<<endl;
-    }
-
-    //vector<Tree*> population = initialPopulation(inputConfig->populationSize);
-      //  population[1]->print();
-       // population[2]->print();
-       // population[1]->crossover(population[2]);
-        // population[1]->print();
-        //population[2]->print();
-    
+    vector<Tree*> population = initialPopulation(inputConfig->populationSize);
+ 
+    Tree* solution = evoluition(inputConfig->numGeneration,population,inputConfig->datasetTrain);
+    cout<<"----------------------------"<<endl;
+    solution->print();
+    cout<<"Fitness Treino: "<<fitness(solution,inputConfig->datasetTrain)<<endl;
+    cout<<"Fitness Teste: "<<fitness(solution,inputConfig->datasetTest)<<endl;
+    cout<<"----------------------------"<<endl;
     return 0;
+}
+Tree* evoluition(int generation,vector<Tree*>population,vector<vector<float>> data){
+    ConfigEntrada* inputConfig = ConfigEntrada::getInstancia();
+    int it =0;
+    Tree* best = nullptr;
+    while(it<generation){
+        best = BestGen(population,data);
+        cout<<"Gen "<<it<<":"<<fitness(best,data)<<endl;
+        best->print();
+        population = selection(inputConfig->selectionType,population,data);
+        population = operatorSelector(population,inputConfig->mutationProb,inputConfig->crossoverProb);
+        it++;
+    }
+    best = BestGen(population,data);
+    return best;
+}
+Tree* BestGen(vector<Tree*> population,vector<vector<float>> data){
+    Tree* best = nullptr;
+    for(int i =0; i<population.size();i++){
+        if(best == nullptr){
+            best= population[i];
+        }
+        if(fitness(population[i],data)<fitness(best,data)){
+            best = population[i];
+        }
+    }
+    return best;
+
 }
 
 vector<Tree*> initialPopulation(int size){
@@ -72,6 +99,8 @@ vector<Tree*> initialPopulation(int size){
 
 Node* generateFullRandomTree(int depth,int depthmax) {
     int random;
+    ConfigEntrada* inputConfig = ConfigEntrada::getInstancia();
+    vector<string> terminal = inputConfig->terminals;
     if(depth == depthmax){
         random = rand()%terminal.size();
         return new NodeTerminal(terminal[random],terminal);
@@ -85,6 +114,8 @@ Node* generateFullRandomTree(int depth,int depthmax) {
 }
 
 Node* generateGrowRandomTree(int depth,int depthmax) {
+    ConfigEntrada* inputConfig = ConfigEntrada::getInstancia();
+    vector<string> terminal = inputConfig->terminals;
     int random;
     random = rand()%2; //Determina se será Operador ou Terminal
     if(random ==1 || depth == DEPTHMAX){
@@ -101,7 +132,8 @@ Node* generateGrowRandomTree(int depth,int depthmax) {
 }
 vector<Tree*> operatorSelector(vector<Tree*>selected,float probMutation,float probCrossover){
     int it=0;
-    int random;
+    float random;
+
     while(it<selected.size()){
         random = (rand() % 100)/100;
         if(random<probMutation){
@@ -110,56 +142,61 @@ vector<Tree*> operatorSelector(vector<Tree*>selected,float probMutation,float pr
         }
         else if(random>= probMutation && random<probMutation+probCrossover && it<selected.size()){ //A ultima condição é para o caso em que it esteja na ultima posição
            selected[it]->crossover(selected[it+1]);
-
             it+=2;
         }
-        it+1;
+
+        it+=1;
 
     }
     return selected;
 }
 
-float fitness(Tree* subject,vector<float>& input,vector<float>&realValues){
-    int N = input.size();
+float fitness(Tree* subject,vector<vector<float>>& dataset){
+    int N = dataset.size();
     float sumEval =0;
    for(int i=0;i<N;i++){
-        sumEval += pow(eval(subject,input[i])-realValues[i],2);
+        sumEval += pow(eval(subject,dataset[i])-dataset[i].back(),2);
    }
-   float RSME = (1/N)*sumEval;
-    return pow(RSME,1/2);
+   float RSME = sumEval/N;
+    return sqrt(RSME);
 }
 
-float eval(Tree* subject,float input){
+float eval(Tree* subject,vector<float> input){
     return subject->f(input);
 }
 
-
-Tree* selectionRoulette(vector<Tree*> population,vector<float>& input,vector<float>&realValues){
-    vector<pair<float,Tree*>> roulette;
+vector<Tree*> selectionRoulette(vector<Tree*> population,vector<vector<float>>& input){
+    vector<Tree*> selected;
+     vector<pair<float,Tree*>> roulette;
     float fitnessTotal =0;
-    float fitnessInd;
+    float fitnessInd=0;
     for(int i=0;i<population.size();i++){
-        fitnessInd = fitness(population[i],input,realValues);
-        roulette.push_back(make_pair(fitnessInd,population[i]));
-        fitnessTotal += fitnessInd;
-    }
-    for(int i = 0;i<roulette.size();i++){
-        roulette[i].first = roulette[i].first/fitnessTotal;
-        if(i!=0){
-            roulette[i].first += roulette[i-1].first;
+        fitnessInd = fitness(population[i],input);
+        if(fitnessInd < pow(10,5)){ // filtra individuos com a fitness muito alta
+            roulette.push_back(make_pair(fitnessInd,population[i]));
+            fitnessTotal += fitnessInd;
         }
-        std::sort(roulette.begin(),roulette.end());
     }
-    float random= (rand()%(int)fitnessTotal)/fitnessTotal;
-    int j =0;
-    while(random>roulette[j].first){
-        j++;
+    std::sort(roulette.begin(),roulette.end());
+    for(int i = 0;i<roulette.size();i++){
+        roulette[i].first =  1-(roulette[i].first/fitnessTotal);
+        
     }
-    return roulette[j].second;
-
+    float random;
+    int it=0;
+    while(it<population.size()){
+        random = (rand()%10000000)/10000000;
+        int j =0;
+        while(random>roulette[j].first){
+            j++;
+        }
+        selected.push_back(roulette[j].second->copy());
+        it++;
+    }
+    return selected;
 }
 
-Tree* selectionTournament(vector<Tree*> population,vector<float>& input,vector<float>&realValues,int k){
+Tree* selectionTournament(vector<Tree*> population,vector<vector<float>>& input,int k){
     Tree* bestTree = nullptr;
     int random=0;
     for(int i=0;i<k;i++){
@@ -167,28 +204,29 @@ Tree* selectionTournament(vector<Tree*> population,vector<float>& input,vector<f
         if (bestTree == nullptr){
             bestTree = population[random];
         }
-        if(fitness(bestTree,input,realValues)<fitness(population[random],input,realValues)){
+        if(fitness(bestTree,input)>fitness(population[random],input)){
             bestTree = population[random];
         }
     }
-    return bestTree;
+    return bestTree->copy();
 }
 
 
-vector<Tree*> selection(int type,vector<Tree*> population,vector<float>& input,vector<float>&realValues,int k){
+vector<Tree*> selection(int type,vector<Tree*> population,vector<vector<float>>& input){
+    ConfigEntrada* inputConfig = ConfigEntrada::getInstancia();
     vector<Tree*> selected;
-    for(int i=0;i<POPULATIONSIZE;i++){
-
         switch(type){
             case 0 : 
-                selected.push_back(selectionRoulette(population,input,realValues));
+                selected = selectionRoulette(population,input);
                 break;
             case 1 : 
-                selected.push_back(selectionTournament(population,input,realValues,k));
+                while(selected.size()<population.size()){
+                    selected.push_back(selectionTournament(population,input,inputConfig->k));
+                }
                 break;
             case 2 : 
                 break;
         }
-    }
+    
     return selected;
 }

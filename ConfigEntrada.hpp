@@ -25,6 +25,7 @@ public:
     int numVariables;
     int selectionType;
     int populationSize;
+    int dephtMax;
     float crossoverProb;
     float mutationProb;
     vector<vector<float>> datasetTrain;

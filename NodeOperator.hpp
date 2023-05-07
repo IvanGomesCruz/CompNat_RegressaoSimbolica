@@ -7,9 +7,10 @@ class NodeOperator: public Node
 {
     public:
     NodeOperator(string operatorType,vector<string> options);
-    float f(float input) override;
+    float f(vector<float>input) override;
     void addChild(Node* child);
     string print() override;
+    Node* copy() override;
 };
 
 

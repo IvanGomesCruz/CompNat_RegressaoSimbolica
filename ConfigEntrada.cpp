@@ -20,14 +20,16 @@ ConfigEntrada::ConfigEntrada(string entrada)
     this->selectionType = stoi(identificaFlag(entrada,"-st "));
     this->seed = stoi(identificaFlag(entrada,"-s "));
     this->k = stoi(identificaFlag(entrada,"-k "));
-    this->mutationProb = stoi(identificaFlag(entrada,"-m "));
-    this->crossoverProb = stoi(identificaFlag(entrada,"-c "));
+    this->mutationProb = stof(identificaFlag(entrada,"-m "))/100;
+    this->crossoverProb = stof(identificaFlag(entrada,"-c "))/100;
     this->trainData = identificaFlag(entrada,"-tr ");
     this->testData = identificaFlag(entrada,"-ts ");
     this->instancia = this;
     this->datasetTest = createVectors(this->testData);
     this->datasetTrain = createVectors(this->trainData);
     this->numVariables = this->datasetTrain[0].size()-1;
+    this->dephtMax = 7;
+    this->terminals = {"1","2"};
     generateVariables();
 
 }
