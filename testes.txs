@@ -16,3 +16,9 @@ Elitsmo:
 
 ./a.out -g 100 -p 100 -s 2 -m 80 -c 20 -k 5 -e 0 -st 1 -tr synth1-train.csv -ts synth1-test.csv -sem
 ./a.out -g 100 -p 100 -s 2 -m 80 -c 20 -k 5 -e 1 -st 1 -tr synth1-train.csv -ts synth1-test.csv -com e =1
+
+
+./a.out -g 500 -p 500 -s 2 -m 5 -c 90 -k 2 -e 1 -st 1 -tr synth1-train.csv -ts synth1-test.csv
+
+
+./tp1.out -g 50 -p 500 -m 0.05 -c 0.9 -k 2 -e 1 -st 0 -tr datasets/synth1/synth1-train.csv -ts datasets/synth1/synth1-test.csv

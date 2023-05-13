@@ -1,18 +1,18 @@
-#include "ConfigEntrada.hpp"
-ConfigEntrada* ConfigEntrada::instancia = nullptr;
+#include "InputConfig.hpp"
+InputConfig* InputConfig::instancia = nullptr;
 
-ConfigEntrada* ConfigEntrada::getInstancia(){
+InputConfig* InputConfig::getInstancia(){
     return instancia;
 }
 
-ConfigEntrada* ConfigEntrada::getInstancia(string entrada){
+InputConfig* InputConfig::getInstancia(string entrada){
     if(instancia==nullptr){
-        instancia = new ConfigEntrada(entrada);
+        instancia = new InputConfig(entrada);
     }
     return getInstancia();
 }
 
-ConfigEntrada::ConfigEntrada(string entrada)
+InputConfig::InputConfig(string entrada)
 {
     // p s k m c
     this->numGeneration = stoi(identificaFlag(entrada,"-g "));
@@ -20,8 +20,8 @@ ConfigEntrada::ConfigEntrada(string entrada)
     this->selectionType = stoi(identificaFlag(entrada,"-st "));
     this->seed = stoi(identificaFlag(entrada,"-s "));
     this->k = stoi(identificaFlag(entrada,"-k "));
-    this->mutationProb = stof(identificaFlag(entrada,"-m "))/100;
-    this->crossoverProb = stof(identificaFlag(entrada,"-c "))/100;
+    this->mutationProb = stof(identificaFlag(entrada,"-m "))*100;
+    this->crossoverProb = stof(identificaFlag(entrada,"-c "))*100;
     this->trainData = identificaFlag(entrada,"-tr ");
     this->testData = identificaFlag(entrada,"-ts ");
     this->elitism = stoi(identificaFlag(entrada,"-e "));
@@ -36,7 +36,7 @@ ConfigEntrada::ConfigEntrada(string entrada)
 }
 
 
-string ConfigEntrada::identificaFlag(string str,string flag){
+string InputConfig::identificaFlag(string str,string flag){
      size_t pos = str.find(flag);
      size_t aux ;
     if(pos != string::npos){
@@ -49,7 +49,7 @@ string ConfigEntrada::identificaFlag(string str,string flag){
     }
 }
 
- vector<vector<float>> ConfigEntrada::createVectors(string Dataset){
+ vector<vector<float>> InputConfig::createVectors(string Dataset){
     string line;
     vector<float> aux;
     vector<vector<float>> dataset;
@@ -67,7 +67,7 @@ string ConfigEntrada::identificaFlag(string str,string flag){
     return dataset;
 
  }
- vector<float> ConfigEntrada::parseCSVLine(string& line) {
+ vector<float> InputConfig::parseCSVLine(string& line) {
     std::vector<float> values;
     std::istringstream iss(line);
     std::string token;
@@ -81,7 +81,7 @@ string ConfigEntrada::identificaFlag(string str,string flag){
     return values;
 }
 
-void ConfigEntrada::generateVariables(){
+void InputConfig::generateVariables(){
     string aux = "x";
     for(int i=0; i<this->numVariables; i++){
         this->terminals.push_back(aux+to_string(i));

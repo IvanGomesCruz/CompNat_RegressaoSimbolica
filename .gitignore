@@ -1,3 +1,8 @@
 /.vscode
 /a.out
 /main
+/logs
+main2.cpp
+*.txt
+*.o
+

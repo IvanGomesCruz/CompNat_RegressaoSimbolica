@@ -1,23 +1,23 @@
-#ifndef CONFIGENTRADA_H
-#define CONFIGENTRADA_H
+#ifndef INPUTCONFIG_H
+#define INPUTCONFIG_H
 #include <iostream>
 #include <string>
 #include <vector>
 #include <fstream>
 #include <sstream>
 using namespace std;
-class ConfigEntrada
+class InputConfig
 {
 private:
-    ConfigEntrada(string entrada);
-    static ConfigEntrada* instancia;
+    InputConfig(string entrada);
+    static InputConfig* instancia;
     string identificaFlag(string entrada,string flag);
-    string trainData;
     string testData;
     vector<vector<float>> createVectors(string Dataset);
     vector<float> parseCSVLine(string& line);
     void generateVariables();
 public:
+    string trainData;
     vector<string> terminals;
     vector<string> operators;
     int seed;
@@ -34,8 +34,8 @@ public:
 
 
     int k;
-    static ConfigEntrada* getInstancia();
-    static ConfigEntrada* getInstancia(string entrada);
+    static InputConfig* getInstancia();
+    static InputConfig* getInstancia(string entrada);
 };
 
 

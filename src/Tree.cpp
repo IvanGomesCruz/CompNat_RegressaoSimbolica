@@ -2,6 +2,7 @@
 
 Tree::Tree(Node* root,int maxDepht){
     this->MaxDepth = maxDepht;
+
     this->root = root;
     this->root->depth = 0;
     
@@ -20,8 +21,8 @@ void Tree::updateDepth(Node* node,int depth =0){
 
     return;
 }
-void Tree::print(){
-    cout<<this->root->print()<<endl;
+string Tree::print(){
+    return this->root->print();
 }
 
 int Tree::dephtTree(){
@@ -73,39 +74,44 @@ void Tree::mutation(){
     mutation(this->root);
 }
 
-void Tree::crossover(Tree* partiner){
-    int partnerDepht = partiner->dephtTree();
-    ///determina uma altura para o crossover;
+void Tree::crossover(Tree* partner){
+    this->updateDepth(this->root,0);
+    partner->updateDepth(partner->root,0);
+    int partnerDepht = partner->dephtTree();
+    int thisDepht = this->dephtTree();
     int height;
-    height = rand()%7; 
+    int bigger = partnerDepht>thisDepht?partnerDepht:thisDepht;
+        height = rand()%bigger; 
+    if(height==0){
+        height++;
+    }
 
-
+    ///determina uma altura para o crossover;
     vector<Node*> thisOptions = this->BFS(height);
-    vector<Node*> partnerOptions = partiner->BFS(height);
-
+    vector<Node*> thisOptionsOperators;
+    vector<Node*> partnerOptions = partner->BFS(height);
+    vector<Node*> partnerOptionsOperators;
+     for(auto it:partnerOptions){
+        if(it->type == 0){
+           thisOptionsOperators.push_back(it);
+        }
+    }
     //gerar o indice dos Nodes a serem trocados
-    int i = rand()%thisOptions.size();
-    int j = rand()%partnerOptions.size();
-
+    for(auto it:partnerOptions){
+        if(it->type == 0){
+            partnerOptionsOperators.push_back(it);
+        }
+    }
+    if(partnerOptionsOperators.size() == 0||thisOptionsOperators.size() ==0){
+        return;
+    }
+    int i = rand()%((int)thisOptionsOperators.size());
+    int j = rand()%((int)partnerOptionsOperators.size());
     //Troca os pontos
-    Node* aux = thisOptions[i]->parent;
-    thisOptions[i]->parent = partnerOptions[j]->parent;
-    if(partnerOptions[j]->parent->children[0]==partnerOptions[j]){
-        partnerOptions[j]->parent->children[0] = thisOptions[i];
-    }
-    else{
-         partnerOptions[j]->parent->children[1] = thisOptions[i];
-    }
 
-    partnerOptions[j]->parent = aux->parent;
-     if(aux->children[0]==thisOptions[i]){
-        aux->children[0] = partnerOptions[j];
-    }
-    else{
-         aux->children[1] = partnerOptions[j];
-    } 
-   
-
+    vector<Node*> temp = thisOptionsOperators[i]->children;
+    thisOptionsOperators[i]->children = partnerOptionsOperators[j]->children;
+    partnerOptionsOperators[j]->children = temp;
 }
 
 vector<Node*> Tree::BFS(int depth){ // retorna os nós que estão na altura estabelecida
@@ -114,7 +120,7 @@ vector<Node*> Tree::BFS(int depth){ // retorna os nós que estão na altura esta
     q.push(this->root);
     while (q.empty() == false) {
       Node* node = q.front();
-      if(node->depth==depth) {
+      if(node->depth<=depth) {
         vector.push_back(node);
       }
       q.pop();

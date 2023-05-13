@@ -4,7 +4,7 @@
 #include <iostream>
 #include <vector>
 #include <string>
-#include "ConfigEntrada.hpp"
+#include "InputConfig.hpp"
 
 using namespace std;
 

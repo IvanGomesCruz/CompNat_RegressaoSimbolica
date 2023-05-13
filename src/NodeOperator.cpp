@@ -4,6 +4,7 @@ NodeOperator::NodeOperator(string operatorType,vector<string> options){
     this->representation = operatorType;
     this->children = {nullptr,nullptr};
     this->options = options;
+    this->type = 0;
 }
 
 float NodeOperator::f(vector<float> input){

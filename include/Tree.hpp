@@ -17,14 +17,15 @@ private:
     int dephtTree(Node* node);
 public:
     int MaxDepth;
+    int depth;
     Node* root;
     Tree(Node* root,int maxDepht);
     int dephtTree();
     void mutation();
     float f(vector<float> input);
-    static void updateDepth(Node* node,int depth);
+    void updateDepth(Node* node,int depth);
     void crossover(Tree* partiner);
-    void print();
+    string print();
     Tree* copy();
 };
 
