@@ -10,3 +10,9 @@ void Node::mutation(){
     this->representation = this->options[random];
     
 }
+Node::~Node(){
+    if(children[0]!= nullptr){
+        delete this->children[0];
+        delete this->children[1];
+    }
+}

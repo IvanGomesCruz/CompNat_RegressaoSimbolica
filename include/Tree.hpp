@@ -27,6 +27,7 @@ public:
     void crossover(Tree* partiner);
     string print();
     Tree* copy();
+    ~Tree();
 };
 
 #endif

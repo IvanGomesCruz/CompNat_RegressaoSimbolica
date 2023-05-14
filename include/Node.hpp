@@ -10,8 +10,8 @@ using namespace std;
 
 //----------------------------------------------------------------
 // Type definitions: 
-// 1- terminal
-// 2- Operator
+// 0- terminal
+// 1- Operator
 
 
 class Node
@@ -28,6 +28,7 @@ class Node
     virtual Node* copy() =0;
     vector<string> options;
     void mutation();
+    virtual ~Node();
 };
 
 

@@ -7,6 +7,11 @@ Tree::Tree(Node* root,int maxDepht){
     this->root->depth = 0;
     
 }
+
+Tree::~Tree(){
+    delete this->root;
+    
+}
 float Tree::f(vector<float> input){
     return this->root->f(input);
 }

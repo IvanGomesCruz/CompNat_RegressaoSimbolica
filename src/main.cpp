@@ -35,6 +35,7 @@ Tree* selectionTournament(vector<Tree*> population,vector<vector<float>>& input,
 Tree* selectionLexicase(vector<Tree*> population,vector<vector<float>> input);
 float threshold(vector<Tree*> selected,vector<float> input);
 float calcMedian(std::vector<float> vector);
+float MAD(vector<float> e);
 //----------------------------------------------------------------
 //----------------------------------------------------------------
 
@@ -97,8 +98,8 @@ int main(int argc, char const *argv[]) {
     string directory = str.substr(0,pos);
     
     string name = directory+"/results/p"+to_string((int)inputConfig->populationSize);
-    name+="g"+to_string((int)inputConfig->numGeneration)+"m"+to_string((int)(inputConfig->mutationProb))+"c"+to_string((int)(inputConfig->crossoverProb));
-    name += "st" + to_string(inputConfig->selectionType)+"p"+to_string(inputConfig->populationSize);
+    name+="g"+to_string((int)inputConfig->numGeneration)+"m"+to_string((int)(inputConfig->mutationProb))+"c"+to_string((int)(inputConfig->crossoverProb))+"e"+to_string(inputConfig->elitism);
+    name += "st" + to_string(inputConfig->selectionType);
     outputFile1.open(name+".txt");
 
     //Tree* bestRandom = BestGen(random,inputConfig->datasetTrain);
@@ -135,28 +136,30 @@ void generateLogs(vector<GenInfo>& info, int seed){
     string directory = str.substr(0,pos);
     
     std::ofstream outputFile1;
-    string name = directory+"/logs/s"+to_string(seed)+"g"+to_string((int)inputConfig->numGeneration)+"p"+to_string(inputConfig->populationSize);
-    name+="m"+to_string((int)(inputConfig->mutationProb))+"c"+to_string((int)(inputConfig->crossoverProb));
+    string name = directory+"/logs/s"+to_string(seed)+"p"+to_string((int)inputConfig->populationSize);
+    name+="g"+to_string((int)inputConfig->numGeneration)+"m"+to_string((int)(inputConfig->mutationProb))+"c"+to_string((int)(inputConfig->crossoverProb))+"e"+to_string(inputConfig->elitism);
     name += "st" + to_string(inputConfig->selectionType);
-    outputFile1.open(name+"_generationsResults.txt"); 
+    outputFile1.open(name+"_generationsResults.csv"); 
     std::ofstream outputFile2;
-    outputFile2.open(name+"_generationsDiversity.txt"); 
+    outputFile2.open(name+"_generationsDiversity.csv"); 
     std::ofstream outputFile3;
-    outputFile3.open(name+"_generationBloat.txt"); 
+    outputFile3.open(name+"_generationBloat.csv"); 
     double best,worse,average,diversity,depthAverage;
     if (outputFile1.is_open() && outputFile2.is_open()) { 
         outputFile1<<"Generation"<<","<<"Best"<<","<<"Worse"<<","<<"Average"<<"\n"; 
         outputFile2<<"Generation"<<","<<"Diversity"<<"\n"; 
         outputFile3<<"Gerneration"<<","<<"Depth average"<<"\n"; 
+        info.erase(info.begin());
         for(auto it :info){
-            best = fitness(it.best,inputConfig->datasetTrain);
-            worse = fitness(it.worse,inputConfig->datasetTrain);
-            outputFile1<<it.generation<<","<<best<<","<<worse<<","<<average<<"\n"; 
-            average = it.average;
-            diversity = it.diversity;
-            outputFile2<<it.generation<<","<<diversity<<"\n"; 
-            depthAverage = it.depthAverage;
-             outputFile3<<it.generation<<","<<depthAverage<<"\n"; 
+           
+                best = fitness(it.best,inputConfig->datasetTrain);
+                worse = fitness(it.worse,inputConfig->datasetTrain);
+                outputFile1<<it.generation<<","<<best<<","<<worse<<","<<average<<"\n"; 
+                average = it.average;
+                diversity = it.diversity;
+                outputFile2<<it.generation<<","<<diversity<<"\n"; 
+                depthAverage = it.depthAverage;
+                outputFile3<<it.generation<<","<<depthAverage<<"\n"; 
 
         }
         outputFile1.close(); 
@@ -408,38 +411,51 @@ vector<Tree*> selection(int type,vector<Tree*> population,vector<vector<float>>&
                 }
                 break;
         }
-    
+    for(auto aux : population){
+        delete aux;
+    }
     return selected;
 }
 
 Tree* selectionLexicase(vector<Tree*> population,vector<vector<float>> input){
-    vector<float> inputExemple;
+    vector<float> fitness;
     vector<Tree*> selected = population;
-    vector<Tree*> next;
-    int seed = rand();
-    std::mt19937 generator(seed);
-    float valueThreshold;
-    std::shuffle(input.begin(), input.end(), generator);
-    while (input.size()!=0&&selected.size()>1){
-        if(selected.size() > 1){
-            inputExemple = input.back();
-            input.pop_back();
-            valueThreshold =threshold(selected,inputExemple);
-            for(auto it:selected){
-                if(it->f(inputExemple) - inputExemple.back()<valueThreshold){
-                    next.push_back(it);
-                }
-            }
-            if(next.size()==0){
-                next.push_back(selected[rand()%selected.size()]);
-            }
-            selected.clear();
-            selected = next;
-            next.clear();
-        }
+    float mad;
+    int it =0;
+    float error;
+    float minError = INFINITY;
+    int idxMinError =0;
+    int random;
+    while(selected.size() >1 && input.size()>0){
+        random = rand()%input.size();
 
+        for(auto aux=0;aux<selected.size();aux++){
+
+            error = selected[aux]->f(input[random])-input[random].back();
+            if(minError < error){
+                minError = error;
+                idxMinError = aux;
+            }
+            fitness.push_back(error);
+        }
+        input.erase(input.begin() + random);
+        mad = MAD(fitness);
+        for(auto aux =0; aux<selected.size();aux++){
+            if(fitness[aux]>fitness[idxMinError]+mad){
+                selected.erase(selected.begin()+aux);
+             }
+        }
+        it++;
+        fitness.clear();
     }
     return selected[0];
+}
+float MAD(vector<float> e){
+    float e_median = calcMedian(e);
+    for(auto e_k:e){
+        e_k = abs(e_k-e_median);
+    }
+    return calcMedian(e);
 }
 
 float calcMedian(std::vector<float> vector) {
@@ -456,26 +472,6 @@ float calcMedian(std::vector<float> vector) {
         return vector[ind];
     }
 }
-float threshold(vector<Tree*> selected,vector<float> input){
-    
-    float median;
-    vector<float> fitnessExemples;
-    float e_min; 
-    float MAD;
-    for(auto it : selected){
-            fitnessExemples.push_back(abs(it->f(input)-input.back()));
-        }
-    std::sort(fitnessExemples.begin(), fitnessExemples.end());
-    e_min = fitnessExemples[0];
-    median = calcMedian(fitnessExemples);
-    for(auto it:fitnessExemples){
-        it= abs(it- median);
-    }
-
-    MAD = calcMedian(fitnessExemples);
-    return e_min + MAD;
-}
-
 
 float calcMean(vector<float> values) {
     float sum = 0;
